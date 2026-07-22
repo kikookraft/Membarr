@@ -111,11 +111,19 @@ async def plexrolels(interaction: discord.Interaction):
     )
 
 
-@plex_commands.command(name="setup", description="Setup Plex integration")
+@jellyfin_commands.command(name="setup", description="Setup Jellyfin integration")
 @app_commands.checks.has_permissions(administrator=True)
-async def setupplex(interaction: discord.Interaction, username: str, password: str, server_name: str,
-                    base_url: str = "", save_token: bool = True):
-    await interaction.response.defer()
+async def setupjelly(interaction: discord.Interaction, server_url: str, api_key: str, external_url: str = None):
+    try:
+        await interaction.response.defer(ephemeral=True)
+    except discord.errors.NotFound:
+        # If the interaction expired, try to respond via followup
+        await interaction.followup.send("Processing your request...", ephemeral=True)
+    # get rid of training slashes
+    server_url = server_url.rstrip('/')
+    # Add http:// if no protocol is specified
+    if not server_url.startswith(('http://', 'https://')):
+        server_url = 'http://' + server_url
     try:
         account = MyPlexAccount(username, password)
         plex = account.resource(server_name).connect()
