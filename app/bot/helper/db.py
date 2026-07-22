@@ -43,17 +43,6 @@ else:
 
 update_table(conn, DB_TABLE)
 
-def save_user_email(username, email):
-    if username and email:
-        conn.execute(f"""
-            INSERT OR REPLACE INTO clients(discord_username, email)
-            VALUES('{username}', '{email}')
-        """)
-        conn.commit()
-        print("User added to db.")
-    else:
-        return "Username and email cannot be empty"
-
 def save_user(username):
     if username:
         conn.execute("INSERT INTO clients (discord_username) VALUES ('"+ username +"')")
@@ -72,38 +61,6 @@ def save_user_jellyfin(username, jellyfin_username):
         print("User added to db.")
     else:
         return "Discord and Jellyfin usernames cannot be empty"
-
-def save_user_all(username, email, jellyfin_username):
-    if username and email and jellyfin_username:
-        conn.execute(f"""
-            INSERT OR REPLACE INTO clients(discord_username, email, jellyfin_username)
-            VALUES('{username}', '{email}', '{jellyfin_username}')
-        """)
-        conn.commit()
-        print("User added to db.")
-    elif username and email:
-        save_user_email(username, email)
-    elif username and jellyfin_username:
-        save_user_jellyfin(username, jellyfin_username)
-    elif username:
-        save_user(username)
-    else:
-        return "Discord username must all be provided"
-
-def get_useremail(username):
-    if username:
-        try:
-            cursor = conn.execute('SELECT discord_username, email from clients where discord_username="{}";'.format(username))
-            for row in cursor:
-                email = row[1]
-            if email:
-                return email
-            else:
-                return "No email found"
-        except:
-            return "error in fetching from db"
-    else:
-        return "username cannot be empty"
 
 def get_jellyfin_username(username):
     """
@@ -126,19 +83,6 @@ def get_jellyfin_username(username):
             return "error in fetching from db"
     else:
         return "username cannot be empty"
-
-def remove_email(username):
-    """
-    Sets email of discord user to null in database
-    """
-    if username:
-        conn.execute(f"UPDATE clients SET email = null WHERE discord_username = '{username}'")
-        conn.commit()
-        print(f"Email removed from user {username} in database")
-        return True
-    else:
-        print(f"Username cannot be empty.")
-        return False
 
 def remove_jellyfin(username):
     """
