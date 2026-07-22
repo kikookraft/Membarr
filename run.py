@@ -47,27 +47,38 @@ bot = Bot()
 @bot.tree.error
 async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.MissingPermissions):
-        await interaction.response.send_message(
-            "You don't have permission to use this command. Administrator permissions are required.",
-            ephemeral=True
-        )
+        try:
+            await interaction.response.send_message(
+                "You don't have permission to use this command. Administrator permissions are required.",
+                ephemeral=True
+            )
+        except discord.NotFound:
+            pass
     elif isinstance(error, app_commands.CommandOnCooldown):
-        await interaction.response.send_message(
-            f"This command is on cooldown. Try again in {error.retry_after:.0f} seconds.",
-            ephemeral=True
-        )
+        try:
+            await interaction.response.send_message(
+                f"This command is on cooldown. Try again in {error.retry_after:.0f} seconds.",
+                ephemeral=True
+            )
+        except discord.NotFound:
+            pass
     else:
         print(f"Unhandled command error: {error}")
         try:
-            await interaction.response.send_message(
-                "An error occurred while running this command. Check the logs.",
-                ephemeral=True
-            )
-        except discord.errors.InteractionResponded:
-            await interaction.followup.send(
-                "An error occurred while running this command. Check the logs.",
-                ephemeral=True
-            )
+            if not interaction.response.is_done():
+                await interaction.response.send_message(
+                    "An error occurred while running this command. Check the logs.",
+                    ephemeral=True
+                )
+            else:
+                await interaction.followup.send(
+                    "An error occurred while running this command. Check the logs.",
+                    ephemeral=True
+                )
+        except discord.NotFound:
+            pass
+        except Exception:
+            pass
 
 
 async def reload():
@@ -121,7 +132,12 @@ async def jellyrolels(interaction: discord.Interaction):
 @jellyfin_commands.command(name="setup", description="Setup Jellyfin integration")
 @app_commands.checks.has_permissions(administrator=True)
 async def setupjelly(interaction: discord.Interaction, server_url: str, api_key: str, external_url: str = None):
-    await interaction.response.defer(ephemeral=True)
+    # Defer immediately — fail gracefully if interaction already expired
+    try:
+        await interaction.response.defer(ephemeral=True)
+    except discord.NotFound:
+        print("Setup command: interaction expired before defer. Ignoring.")
+        return
     # get rid of trailing slashes
     server_url = server_url.rstrip('/')
     # Add http:// if no protocol is specified
@@ -199,9 +215,9 @@ async def enablejellyfin(interaction: discord.Interaction):
     confighelper.change_config("jellyfin_enabled", True)
     print("Jellyfin enabled, reloading server")
     confighelper.USE_JELLYFIN = True
-    await reload()
     await interaction.response.send_message("Jellyfin enabled. Restarting server. Give it a few seconds.",
                                             ephemeral=True)
+    await reload()
     print("Bot has restarted. Give it a few seconds.")
 
 
@@ -213,10 +229,10 @@ async def disablejellyfin(interaction: discord.Interaction):
         return
     confighelper.change_config("jellyfin_enabled", False)
     print("Jellyfin disabled, reloading server")
-    await reload()
     confighelper.USE_JELLYFIN = False
     await interaction.response.send_message("Jellyfin disabled. Restarting server. Give it a few seconds.",
                                             ephemeral=True)
+    await reload()
     print("Bot has restarted. Give it a few seconds.")
 
 

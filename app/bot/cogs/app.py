@@ -201,7 +201,11 @@ class app(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     @jellyfin_commands.command(name="invite", description="Invite a Discord user to Jellyfin")
     async def jellyfininvite(self, interaction: discord.Interaction, member: discord.Member, username: str):
-        await interaction.response.defer(ephemeral=True)
+        try:
+            await interaction.response.defer(ephemeral=True)
+        except discord.NotFound:
+            print("Invite command: interaction expired before defer. Ignoring.")
+            return
         password = jelly.generate_password(16)
         if await self.addtojellyfin(username, password, interaction.followup):
             await self.send_credentials(member, username, password)
