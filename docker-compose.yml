@@ -1,0 +1,9 @@
+services:
+  membarr:
+    build: .
+    container_name: membarr
+    restart: unless-stopped
+    volumes:
+      - ./bot.env:/app/bot.env
+      - ./app/config:/app/app/config
+    command: python -u run.py

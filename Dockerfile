@@ -9,6 +9,7 @@ RUN \
     apk --no-cache add -q git cloc openssl openssl-dev openssh alpine-sdk bash gettext sudo build-base gnupg linux-headers xz
 
 WORKDIR /app
-COPY . .
+COPY requirements.txt .
 RUN pip install -Ur requirements.txt
+COPY . .
 CMD ["python", "-u", "run.py"]

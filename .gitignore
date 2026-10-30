@@ -5,3 +5,5 @@ __pycache__/
 mount
 .idea
 .venv
+bot.env
+.vscode
