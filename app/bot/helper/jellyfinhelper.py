@@ -6,7 +6,7 @@ def add_user(jellyfin_url, jellyfin_api_key, username, password, jellyfin_libs):
     try:
         url = f"{jellyfin_url}/Users/New"
 
-        querystring = {"api_key": jellyfin_api_key}
+        querystring = {"ApiKey": jellyfin_api_key}
         payload = {
             "Name": username,
             "Password": password
@@ -33,7 +33,7 @@ def add_user(jellyfin_url, jellyfin_api_key, username, password, jellyfin_libs):
 
         # Grant access to User
         url = f"{jellyfin_url}/Users/{userId}/Policy"
-        querystring = {"api_key": jellyfin_api_key}
+        querystring = {"ApiKey": jellyfin_api_key}
 
         enabled_folders = []
         server_libs = get_libraries(jellyfin_url, jellyfin_api_key)
@@ -107,7 +107,7 @@ def add_user(jellyfin_url, jellyfin_api_key, username, password, jellyfin_libs):
 def get_libraries(jellyfin_url, jellyfin_api_key):
     try:
         url = f"{jellyfin_url}/Library/VirtualFolders"
-        querystring = {"api_key": jellyfin_api_key}
+        querystring = {"ApiKey": jellyfin_api_key}
         response = requests.request("GET", url, params=querystring)
         if response.status_code == 200:
             return response.json()
@@ -149,7 +149,7 @@ def remove_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
         
         # Delete User
         url = f"{jellyfin_url}/Users/{userId}"
-        querystring = {"api_key": jellyfin_api_key}
+        querystring = {"ApiKey": jellyfin_api_key}
         response = requests.request("DELETE", url, params=querystring)
 
         if response.status_code in (200, 204):
@@ -164,7 +164,7 @@ def remove_user(jellyfin_url, jellyfin_api_key, jellyfin_username):
 def get_users(jellyfin_url, jellyfin_api_key):
     try:
         url = f"{jellyfin_url}/Users"
-        querystring = {"api_key": jellyfin_api_key}
+        querystring = {"ApiKey": jellyfin_api_key}
         response = requests.request("GET", url, params=querystring)
         if response.status_code == 200:
             return response.json()
@@ -196,7 +196,7 @@ def generate_password(length, lower=True, upper=True, numbers=True, symbols=Fals
 def get_config(jellyfin_url, jellyfin_api_key):
     try:
         url = f"{jellyfin_url}/System/Configuration"
-        querystring = {"api_key": jellyfin_api_key}
+        querystring = {"ApiKey": jellyfin_api_key}
         response = requests.request("GET", url, params=querystring, timeout=5)
         if response.status_code == 200:
             return response.json()
@@ -210,6 +210,6 @@ def get_config(jellyfin_url, jellyfin_api_key):
 def get_status(jellyfin_url, jellyfin_api_key):
     url = f"{jellyfin_url}/System/Configuration"
 
-    querystring = {"api_key":jellyfin_api_key}
+    querystring = {"ApiKey":jellyfin_api_key}
     response = requests.request("GET", url, params=querystring, timeout=5)
     return response.status_code
